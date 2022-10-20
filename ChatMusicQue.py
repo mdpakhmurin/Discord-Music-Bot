@@ -1,7 +1,15 @@
+import imp
 import zope.interface
 
+from IChat import IChat
+from IQue import IQue
 
-class IQue(zope.interface.Interface):
+
+@ zope.interface.implementer(IChat, IQue)
+class ChatMusicQue():
+    def get_chat_id():
+        pass
+
     def push_back(elemnt: object) -> None:
         pass
 
