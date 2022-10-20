@@ -1,4 +1,5 @@
 import imp
+import string
 import zope.interface
 
 from IChat import IChat
@@ -7,20 +8,23 @@ from IQue import IQue
 
 @ zope.interface.implementer(IChat, IQue)
 class ChatMusicQue():
-    def get_chat_id():
+    def __init__(self, chat_id: str):
         pass
 
-    def push_back(elemnt: object) -> None:
+    def chat_id(self):
         pass
 
-    def peek_front() -> object:
+    def push_back(self, element: object) -> None:
         pass
 
-    def pop_front() -> object:
+    def peek_front(self) -> object:
         pass
 
-    def clear():
+    def pop_front(self) -> object:
         pass
 
-    def size() -> int:
+    def clear(self) -> None:
+        pass
+
+    def size(self) -> int:
         pass
