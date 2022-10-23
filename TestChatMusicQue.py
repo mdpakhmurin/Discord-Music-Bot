@@ -1,14 +1,15 @@
 import unittest
+
 from zope.interface.verify import verifyObject
 
-from ChatMusicQue import ChatMusicQue
+from RedisChatMusicQue import RedisChatMusicQue
 from IChat import IChat
 from IQue import IQue
 
 
 class TestChatMusicQue(unittest.TestCase):
     def setUp(self):
-        self.que = ChatMusicQue('____test___id')
+        self.que = RedisChatMusicQue('____test___id')
         self.que.clear()
 
     def test_ique_implemented(self):
@@ -18,7 +19,7 @@ class TestChatMusicQue(unittest.TestCase):
         self.assertTrue(verifyObject(IChat, self.que))
 
     def test_chat_id(self):
-        self.assertEqual(self.que.chat_id, '____test___id')
+        self.assertEqual(self.que.chat_id(), '____test___id')
 
     def test_push(self):
         self.assertEqual(self.que.size(), 0)
@@ -72,7 +73,7 @@ class TestChatMusicQue(unittest.TestCase):
     def test_que_with_same_id_has_same_elems(self):
         self.que.push_back("new element")
 
-        new_que = ChatMusicQue('____test___id')
+        new_que = RedisChatMusicQue('____test___id')
         self.assertEqual(self.que.peek_front(), new_que.peek_front())
 
     def tearDown(self):
