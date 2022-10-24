@@ -3,8 +3,8 @@ import zope.interface
 import redis
 import pickle
 
-from IChat import IChat
-from IQue import IQue
+from model.IChat import IChat
+from model.ChatMusicQueue.IQue import IQue
 
 
 @zope.interface.implementer(IChat, IQue)
@@ -13,7 +13,7 @@ class RedisChatMusicQue():
         self._bd = redis.Redis(host=host, port=port)
         self._chat_id = chat_id
 
-    def chat_id(self):
+    def chat_id(self) -> str:
         return self._chat_id
 
     def push_back(self, element: object) -> None:

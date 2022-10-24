@@ -2,9 +2,9 @@ import unittest
 
 from zope.interface.verify import verifyObject
 
-from IMusicBase import IMusicBase
-from YTMusicBase import YTMusicBase
-from IMusic import IMusic
+from model.MusicBase.IMusicBase import IMusicBase
+from model.MusicBase.YTMusicBase import YTMusicBase
+from model.IMusic import IMusic
 
 
 class TestChatMusicQue(unittest.TestCase):

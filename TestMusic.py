@@ -2,8 +2,8 @@ import unittest
 
 from zope.interface.verify import verifyObject
 
-from IMusic import IMusic
-from Music import Music
+from model.IMusic import IMusic
+from model.Music import Music
 
 
 class TestMusic(unittest.TestCase):

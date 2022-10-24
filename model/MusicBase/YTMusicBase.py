@@ -3,9 +3,9 @@ from typing import List
 import zope.interface
 import youtube_dl
 
-from IMusic import IMusic
-from IMusicBase import IMusicBase
-from Music import Music
+from model.IMusic import IMusic
+from model.Music import Music
+from model.MusicBase.IMusicBase import IMusicBase
 
 
 @zope.interface.implementer(IMusicBase)

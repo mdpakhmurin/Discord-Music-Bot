@@ -2,9 +2,9 @@ import unittest
 
 from zope.interface.verify import verifyObject
 
-from RedisChatMusicQue import RedisChatMusicQue
-from IChat import IChat
-from IQue import IQue
+from model.ChatMusicQueue.RedisChatMusicQue import RedisChatMusicQue
+from model.IChat import IChat
+from model.ChatMusicQueue.IQue import IQue
 
 
 class TestChatMusicQue(unittest.TestCase):

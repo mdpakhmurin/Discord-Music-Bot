@@ -1,6 +1,6 @@
 import zope.interface
 
-from IMusic import IMusic
+from model.IMusic import IMusic
 
 @zope.interface.implementer(IMusic)
 class Music():
