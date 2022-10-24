@@ -24,7 +24,10 @@ class YTMusicBase():
             search_result = ydl.extract_info(f"ytsearch:{text}", download=False)['entries']
             if len(search_result) > 0:
                 first_music = search_result[0]
+
+                author = first_music['channel']
+                title = first_music['title']
                 url = first_music['formats'][0]['url']
-                musics.append(Music(first_music['channel'], first_music['title'], url))
+                musics.append(Music(author, title, url))
 
         return musics
