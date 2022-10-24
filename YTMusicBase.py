@@ -19,12 +19,12 @@ class YTMusicBase():
     def search(self, text: str) -> List[IMusic]:
         ydl_opts = {'format': 'bestaudio'}
 
-        music = Music("", "", "")
+        musics = []
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            search_result = ydl.extract_info(f"ytsearch:{text}", download=False)
-            first_music = search_result['entries'][0]
-            url = first_music['formats'][0]['url']
+            search_result = ydl.extract_info(f"ytsearch:{text}", download=False)['entries']
+            if len(search_result) > 0:
+                first_music = search_result[0]
+                url = first_music['formats'][0]['url']
+                musics.append(Music(first_music['channel'], first_music['title'], url))
 
-            music = Music(first_music['channel'], first_music['title'], url)
-
-        return [music]
+        return musics
