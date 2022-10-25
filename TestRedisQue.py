@@ -6,7 +6,7 @@ from model.Queue.RedisQue import RedisQue
 from model.Queue.IQue import IQue
 
 
-class TestChatMusicQue(unittest.TestCase):
+class TestRedisQue(unittest.TestCase):
     def setUp(self):
         self.que = RedisQue('____test___id')
         self.que.clear()
@@ -35,18 +35,15 @@ class TestChatMusicQue(unittest.TestCase):
         self.que.push_back(44444444)
         self.assertEqual(self.que.get_size(), 5)
 
-    def test_peek_first(self):
-        self.que.push_back('zero')
-        self.que.push_back(1)
-
-        self.assertEqual(self.que.peek_front(), 'zero')
-
     def test_peek_front(self):
         self.que.push_back('zero')
         self.que.push_back(1)
 
         self.assertEqual(self.que.peek_front(), 'zero')
         self.assertEqual(self.que.get_size(), 2)
+
+    def test_peek_empty(self):
+        self.que.peek_front()
 
     def test_pop_front(self):
         self.que.push_back('zero')
@@ -57,6 +54,9 @@ class TestChatMusicQue(unittest.TestCase):
 
         self.assertEqual(self.que.pop_front(), 1)
         self.assertEqual(self.que.get_size(), 0)
+
+    def test_pop_empty(self):
+        self.que.pop_front()
 
     def test_clear(self):
         self.que.push_back('zero')
