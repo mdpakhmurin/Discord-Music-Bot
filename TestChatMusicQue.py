@@ -3,7 +3,6 @@ import unittest
 from zope.interface.verify import verifyObject
 
 from model.ChatMusicQueue.RedisChatMusicQue import RedisChatMusicQue
-from model.IChat import IChat
 from model.ChatMusicQueue.IQue import IQue
 
 
@@ -15,29 +14,26 @@ class TestChatMusicQue(unittest.TestCase):
     def test_ique_implemented(self):
         self.assertTrue(verifyObject(IQue, self.que))
 
-    def test_ichat_implemented(self):
-        self.assertTrue(verifyObject(IChat, self.que))
-
-    def test_chat_id(self):
-        self.assertEqual(self.que.chat_id(), '____test___id')
+    def test_id(self):
+        self.assertEqual(self.que.get_id(), '____test___id')
 
     def test_push(self):
-        self.assertEqual(self.que.size(), 0)
+        self.assertEqual(self.que.get_size(), 0)
 
         self.que.push_back('zero')
-        self.assertEqual(self.que.size(), 1)
+        self.assertEqual(self.que.get_size(), 1)
 
         self.que.push_back(1)
-        self.assertEqual(self.que.size(), 2)
+        self.assertEqual(self.que.get_size(), 2)
 
         self.que.push_back([2, 2])
-        self.assertEqual(self.que.size(), 3)
+        self.assertEqual(self.que.get_size(), 3)
 
         self.que.push_back({3, 3, 3})
-        self.assertEqual(self.que.size(), 4)
+        self.assertEqual(self.que.get_size(), 4)
 
         self.que.push_back(44444444)
-        self.assertEqual(self.que.size(), 5)
+        self.assertEqual(self.que.get_size(), 5)
 
     def test_peek_first(self):
         self.que.push_back('zero')
@@ -50,17 +46,17 @@ class TestChatMusicQue(unittest.TestCase):
         self.que.push_back(1)
 
         self.assertEqual(self.que.peek_front(), 'zero')
-        self.assertEqual(self.que.size(), 2)
+        self.assertEqual(self.que.get_size(), 2)
 
     def test_pop_front(self):
         self.que.push_back('zero')
         self.que.push_back(1)
 
         self.assertEqual(self.que.pop_front(), 'zero')
-        self.assertEqual(self.que.size(), 1)
+        self.assertEqual(self.que.get_size(), 1)
 
         self.assertEqual(self.que.pop_front(), 1)
-        self.assertEqual(self.que.size(), 0)
+        self.assertEqual(self.que.get_size(), 0)
 
     def test_clear(self):
         self.que.push_back('zero')
@@ -68,7 +64,7 @@ class TestChatMusicQue(unittest.TestCase):
 
         self.que.clear()
 
-        self.assertEqual(self.que.size(), 0)
+        self.assertEqual(self.que.get_size(), 0)
 
     def test_que_with_same_id_has_same_elems(self):
         self.que.push_back("new element")

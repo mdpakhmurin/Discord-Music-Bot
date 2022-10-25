@@ -14,5 +14,5 @@ class IQue(zope.interface.Interface):
     def clear():
         pass
 
-    def size() -> int:
+    def get_size() -> int:
         pass
