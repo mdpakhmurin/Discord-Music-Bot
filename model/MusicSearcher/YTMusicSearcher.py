@@ -5,11 +5,11 @@ import youtube_dl
 
 from model.IMusic import IMusic
 from model.Music import Music
-from model.MusicBase.IMusicBase import IMusicBase
+from model.MusicSearcher.IMusicSearcher import IMusicSearcher
 
 
-@zope.interface.implementer(IMusicBase)
-class YTMusicBase():
+@zope.interface.implementer(IMusicSearcher)
+class YTMusicSearcher():
     def __init__(self):
         pass
 
