@@ -2,13 +2,13 @@ import unittest
 
 from zope.interface.verify import verifyObject
 
-from model.ChatMusicQueue.RedisChatMusicQue import RedisChatMusicQue
-from model.ChatMusicQueue.IQue import IQue
+from model.Queue.RedisQue import RedisQue
+from model.Queue.IQue import IQue
 
 
 class TestChatMusicQue(unittest.TestCase):
     def setUp(self):
-        self.que = RedisChatMusicQue('____test___id')
+        self.que = RedisQue('____test___id')
         self.que.clear()
 
     def test_ique_implemented(self):
@@ -69,7 +69,7 @@ class TestChatMusicQue(unittest.TestCase):
     def test_que_with_same_id_has_same_elems(self):
         self.que.push_back("new element")
 
-        new_que = RedisChatMusicQue('____test___id')
+        new_que = RedisQue('____test___id')
         self.assertEqual(self.que.peek_front(), new_que.peek_front())
 
     def tearDown(self):

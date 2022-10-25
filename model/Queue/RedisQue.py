@@ -4,11 +4,11 @@ import redis
 import pickle
 
 from model.IServerId import IServerId
-from model.ChatMusicQueue.IQue import IQue
+from model.Queue.IQue import IQue
 
 
 @zope.interface.implementer(IQue)
-class RedisChatMusicQue():
+class RedisQue():
     def __init__(self, chat_id: str, host='localhost', port='6379'):
         self._bd = redis.Redis(host=host, port=port)
         self._id = chat_id
