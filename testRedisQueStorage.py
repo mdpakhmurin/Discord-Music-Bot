@@ -6,7 +6,7 @@ from model.Queue.IQue import IQue
 from model.Queue.IQueStorage import IQueStorage
 from model.Queue.RedisQueStorage import RedisQueStorage
 
-class TestChatMusicQue(unittest.TestCase):
+class TestRedisQueStorage(unittest.TestCase):
     def setUp(self):
         self.storage = RedisQueStorage()
 
