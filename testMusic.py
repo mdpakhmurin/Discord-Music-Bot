@@ -17,14 +17,14 @@ class TestMusic(unittest.TestCase):
     def test_IMusic_implemented(self):
         self.assertTrue(verifyObject(IMusic, self.music))
 
-    def test_author(self):
-        self.assertEqual(self.music.author(), self.author)
+    def test_get_author(self):
+        self.assertEqual(self.music.get_author(), self.author)
 
-    def test_title(self):
-        self.assertEqual(self.music.title(), self.title)
+    def test_get_title(self):
+        self.assertEqual(self.music.get_title(), self.title)
 
-    def test_link(self):
-        self.assertEqual(self.music.link(), self.link)
+    def test_get_link(self):
+        self.assertEqual(self.music.get_link(), self.link)
 
     def tearDown(self):
         pass

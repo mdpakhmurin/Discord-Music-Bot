@@ -9,13 +9,13 @@ class Music():
         self._title = str(title)
         self._link = str(link)
 
-    def author(self) -> str:
+    def get_author(self) -> str:
         return self._author
     
-    def title(self) -> str:
+    def get_title(self) -> str:
         return self._title
     
-    def link(self) -> str:
+    def get_link(self) -> str:
         return self._link
 
     def __repr__(self) -> str:
