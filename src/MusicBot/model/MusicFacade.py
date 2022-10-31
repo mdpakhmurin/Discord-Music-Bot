@@ -1,13 +1,14 @@
 from typing import List
-from model.IMusic import IMusic
+from MusicBot.model.IMusic import IMusic
+from MusicBot.model.IMusic import IMusic
 
-from model.Music import Music
-from model.Queue.IQue import IQue
-from model.Queue.IQueStorage import IQueStorage
-from model.Queue.RedisQueStorage import RedisQueStorage
+from MusicBot.model.Music import Music
+from MusicBot.model.Queue.IQue import IQue
+from MusicBot.model.Queue.IQueStorage import IQueStorage
+from MusicBot.model.Queue.RedisQueStorage import RedisQueStorage
 
-from model.MusicSearcher.IMusicSearcher import IMusicSearcher
-from model.MusicSearcher.YTMusicSearcher import YTMusicSearcher
+from MusicBot.model.MusicSearcher.IMusicSearcher import IMusicSearcher
+from MusicBot.model.MusicSearcher.YTMusicSearcher import YTMusicSearcher
 
 DEFAULT_MUSIC_SEARCHER = YTMusicSearcher()
 DEFAULT_QUE_STORAGE = RedisQueStorage()

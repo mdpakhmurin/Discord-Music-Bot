@@ -3,8 +3,8 @@ import zope.interface
 import redis
 import pickle
 
-from model.IServerId import IServerId
-from model.Queue.IQue import IQue
+from MusicBot.model.IServerId import IServerId
+from MusicBot.model.Queue.IQue import IQue
 
 
 @zope.interface.implementer(IQue)

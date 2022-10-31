@@ -2,8 +2,8 @@ import unittest
 
 from zope.interface.verify import verifyObject
 
-from model.Queue.RedisQue import RedisQue
-from model.Queue.IQue import IQue
+from MusicBot.model.Queue.RedisQue import RedisQue
+from MusicBot.model.Queue.IQue import IQue
 
 
 class TestRedisQue(unittest.TestCase):

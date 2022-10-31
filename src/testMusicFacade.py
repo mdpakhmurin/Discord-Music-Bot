@@ -2,11 +2,11 @@ import unittest
 
 from zope.interface.verify import verifyObject
 
-from model.MusicSearcher.IMusicSearcher import IMusicSearcher
-from model.MusicSearcher.YTMusicSearcher import YTMusicSearcher
-from model.IMusic import IMusic
+from MusicBot.model.MusicSearcher.IMusicSearcher import IMusicSearcher
+from MusicBot.model.MusicSearcher.YTMusicSearcher import YTMusicSearcher
+from MusicBot.model.IMusic import IMusic
 
-from model.MusicFacade import MusicFacade, DEFAULT_MUSIC_SEARCHER, DEFAULT_QUE_STORAGE
+from MusicBot.model.MusicFacade import MusicFacade, DEFAULT_MUSIC_SEARCHER, DEFAULT_QUE_STORAGE
 
 
 class TestMusicFacade(unittest.TestCase):

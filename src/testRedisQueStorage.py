@@ -1,10 +1,10 @@
 import unittest
 
 from zope.interface.verify import verifyObject
-from model.Queue.IQue import IQue
+from MusicBot.model.Queue.IQue import IQue
 
-from model.Queue.IQueStorage import IQueStorage
-from model.Queue.RedisQueStorage import RedisQueStorage
+from MusicBot.model.Queue.IQueStorage import IQueStorage
+from MusicBot.model.Queue.RedisQueStorage import RedisQueStorage
 
 class TestRedisQueStorage(unittest.TestCase):
     def setUp(self):

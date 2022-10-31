@@ -1,10 +1,8 @@
 import unittest
-
 from zope.interface.verify import verifyObject
 
-from model.IMusic import IMusic
-from model.Music import Music
-
+from MusicBot.model.IMusic import IMusic
+from MusicBot.model.Music import Music
 
 class TestMusic(unittest.TestCase):
     def setUp(self):

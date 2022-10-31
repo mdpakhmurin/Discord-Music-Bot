@@ -1,7 +1,7 @@
 from typing import List
 import zope.interface
 
-from model.IMusic import IMusic
+from MusicBot.model.IMusic import IMusic
 
 
 class IMusicSearcher(zope.interface.Interface):

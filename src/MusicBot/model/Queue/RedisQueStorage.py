@@ -1,8 +1,8 @@
 import zope.interface
-from model.Queue.IQue import IQue
+from MusicBot.model.Queue.IQue import IQue
 
-from model.Queue.IQueStorage import IQueStorage
-from model.Queue.RedisQue import RedisQue
+from MusicBot.model.Queue.IQueStorage import IQueStorage
+from MusicBot.model.Queue.RedisQue import RedisQue
 
 @zope.interface.implementer(IQueStorage)
 class RedisQueStorage():

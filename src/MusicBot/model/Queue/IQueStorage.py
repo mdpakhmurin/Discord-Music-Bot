@@ -1,6 +1,6 @@
 import zope.interface
 
-from model.Queue.IQue import IQue
+from MusicBot.model.Queue.IQue import IQue
 
 
 class IQueStorage(zope.interface.Interface):

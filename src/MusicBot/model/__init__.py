@@ -1,0 +1,1 @@
+from MusicBot.model.IMusic import IMusic
