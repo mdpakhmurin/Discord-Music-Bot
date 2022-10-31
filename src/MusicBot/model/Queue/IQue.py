@@ -1,3 +1,5 @@
+from typing import List
+
 import zope.interface
 
 
@@ -15,4 +17,7 @@ class IQue(zope.interface.Interface):
         pass
 
     def get_size() -> int:
+        pass
+
+    def get_all() -> List[object]:
         pass

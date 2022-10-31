@@ -1,3 +1,4 @@
+from typing import List
 import zope.interface
 
 import redis
@@ -41,3 +42,8 @@ class RedisQue():
 
     def get_size(self) -> int:
         return self._bd.llen(self._id)
+
+    def get_all(self) -> List[object]:
+        elems = self._bd.lrange(self._id, 0, -1)
+        elems = [pickle.loads(x) for x in elems]
+        return elems

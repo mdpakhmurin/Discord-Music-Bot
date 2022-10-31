@@ -72,6 +72,16 @@ class TestRedisQue(unittest.TestCase):
         new_que = RedisQue('____test___id')
         self.assertEqual(self.que.peek_front(), new_que.peek_front())
 
+    def test_get_all(self):
+        pushElems = [1111, 222, '333']
+
+        for el in pushElems:
+            self.que.push_back(el)
+        
+        getElems = self.que.get_all()
+
+        self.assertEqual(len(set(pushElems) & set(getElems)), len(pushElems))
+
     def tearDown(self):
         self.que.clear()
 
