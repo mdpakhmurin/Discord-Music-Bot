@@ -50,5 +50,9 @@ class MusicFacade:
         que = self._que_storage.get_que(server_id)
         que.clear()
 
+    def list_que(self, server_id: str) -> List[IMusic]:
+        que = self._que_storage.get_que(server_id)
+        return que.get_all()
+
     def search_music(self, music: str) -> List[IMusic]:
         return self._searcher.search(music)

@@ -80,7 +80,8 @@ class TestRedisQue(unittest.TestCase):
         
         getElems = self.que.get_all()
 
-        self.assertEqual(len(set(pushElems) & set(getElems)), len(pushElems))
+        sameEl = set(pushElems) & set(getElems)
+        self.assertEqual(len(sameEl), len(pushElems))
 
     def tearDown(self):
         self.que.clear()

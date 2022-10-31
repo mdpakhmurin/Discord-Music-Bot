@@ -89,6 +89,26 @@ class TestMusicFacade(unittest.TestCase):
         self.assertEqual(add_result.get_title(), search_result.get_title())
 
         self.music_facade.clear_que(target_que)
+
+    def test_list_que(self):
+        search_text = 'never gonna'
+        target_que = '__test_id'
+
+        #add one collection twice
+        self.music_facade.add_to_que(target_que, search_text)
+        self.music_facade.add_to_que(target_que, search_text)
+        get_all_result = self.music_facade.list_que()
+
+        #search one collection twice
+        search_result = self.music_facade.search_music(search_text)[0]
+        search_result = search_result + search_result
+
+        # search and get all are equal 
+        sameEl = set(get_all_result) & set(search_result)
+        self.assertEqual(len(sameEl), len(search_result))
+
+        self.music_facade.clear_que(target_que)
+
         
     def tearDown(self):
         pass
