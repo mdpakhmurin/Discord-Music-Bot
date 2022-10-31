@@ -34,7 +34,7 @@ class TestMusicFacade(unittest.TestCase):
 
     def test_set_music_searcher(self):
         bad_music_searcher = None
-        good_music_searcher = DEFAULT_MUSIC_SEARCHER 
+        good_music_searcher = DEFAULT_MUSIC_SEARCHER
 
         # breaks when bad searcher set
         self.music_facade.set_music_searcher(bad_music_searcher)
@@ -52,64 +52,66 @@ class TestMusicFacade(unittest.TestCase):
             self.fail()
 
     def test_get_pop_from_que(self):
-        target_que = '__test_id'
+        target_server = '__test_id'
 
-        self.music_facade.add_to_que(target_que, 'never gonna')
-        start_que_size = self.music_facade.get_que_size(target_que)
+        self.music_facade.add_to_que(target_server, 'never gonna')
+        start_que_size = self.music_facade.get_que_size(target_server)
 
-        self.music_facade.pop_que_first(target_que)
-        current_que_size = self.music_facade.get_que_size(target_que)
+        self.music_facade.pop_que_first(target_server)
+        current_que_size = self.music_facade.get_que_size(target_server)
 
         self.assertEqual(start_que_size - 1, current_que_size)
 
         self.music_facade.clear_que('__test_id')
 
     def test_get_peek_from_que(self):
-        target_que = '__test_id'
+        target_server = '__test_id'
 
-        self.music_facade.add_to_que(target_que, 'never gonna')
-        start_que_size = self.music_facade.get_que_size(target_que)
+        self.music_facade.add_to_que(target_server, 'never gonna')
+        start_que_size = self.music_facade.get_que_size(target_server)
 
-        self.music_facade.peek_que_first(target_que)
-        current_que_size = self.music_facade.get_que_size(target_que)
+        self.music_facade.peek_que_first(target_server)
+        current_que_size = self.music_facade.get_que_size(target_server)
 
         self.assertEqual(start_que_size, current_que_size)
 
-        self.music_facade.clear_que(target_que)
+        self.music_facade.clear_que(target_server)
 
     def test_add_and_search_are_equal(self):
         search_text = 'never gonna'
-        target_que = '__test_id'
+        target_server = '__test_id'
 
-        self.music_facade.add_to_que(target_que, search_text)
-        add_result = self.music_facade.peek_que_first(target_que)
+        add_result = self.music_facade.add_to_que(
+            target_server, search_text)[0]
         search_result = self.music_facade.search_music(search_text)[0]
 
         self.assertEqual(add_result.get_author(), search_result.get_author())
         self.assertEqual(add_result.get_title(), search_result.get_title())
 
-        self.music_facade.clear_que(target_que)
+        self.music_facade.clear_que(target_server)
 
     def test_list_que(self):
-        search_text = 'never gonna'
-        target_que = '__test_id'
+        search_text_0 = 'never gonna'
+        search_text_1 = 'My Arms Keep Missing You '
+        target_server = '__test_id'
 
-        #add one collection twice
-        self.music_facade.add_to_que(target_que, search_text)
-        self.music_facade.add_to_que(target_que, search_text)
-        get_all_result = self.music_facade.list_que()
+        # add one collection twice
+        add_result = self.music_facade.add_to_que(target_server, search_text_0)
+        add_result += self.music_facade.add_to_que(target_server, search_text_1)
 
-        #search one collection twice
-        search_result = self.music_facade.search_music(search_text)[0]
-        search_result = search_result + search_result
+        get_all_result = self.music_facade.list_que(target_server)
 
-        # search and get all are equal 
-        sameEl = set(get_all_result) & set(search_result)
-        self.assertEqual(len(sameEl), len(search_result))
+        # search and get all are equal
+        for i in range(len(get_all_result)):
+            is_same_author = get_all_result[i].get_author() == add_result[i].get_author()
+            is_same_title = get_all_result[i].get_title() == add_result[i].get_title()
 
-        self.music_facade.clear_que(target_que)
+            if not is_same_author or not is_same_title:
+                self.fail("list_que_all returns incorrect list")
+                break
 
-        
+        self.music_facade.clear_que(target_server)
+
     def tearDown(self):
         pass
 

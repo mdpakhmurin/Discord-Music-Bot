@@ -28,11 +28,14 @@ class MusicFacade:
     def set_music_searcher(self, searcher: IMusicSearcher) -> None:
         self._searcher = searcher
 
-    def add_to_que(self, server_id: str, music: str) -> None:
+    def add_to_que(self, server_id: str, music: str) -> List[IMusic]:
         que = self._que_storage.get_que(server_id)
         music_list = self.search_music(music)
+
         for music in music_list:
             que.push_back(music)
+
+        return music_list
 
     def peek_que_first(self, server_id: str) -> IMusic:
         que = self._que_storage.get_que(server_id)
