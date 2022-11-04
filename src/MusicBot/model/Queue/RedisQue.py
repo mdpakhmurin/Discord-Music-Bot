@@ -4,7 +4,6 @@ import zope.interface
 import redis
 import pickle
 
-from MusicBot.model.IServerId import IServerId
 from MusicBot.model.Queue.IQue import IQue
 
 

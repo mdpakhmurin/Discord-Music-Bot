@@ -1,3 +1,4 @@
+from redis import Redis
 from MusicBot.bot.bot import run
 import config
 
