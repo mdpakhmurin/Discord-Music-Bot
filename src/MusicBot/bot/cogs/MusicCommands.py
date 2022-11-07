@@ -1,126 +1,206 @@
 from typing import List
 
+import discord
 from discord.ext import commands
 import wavelink
+import datetime
 
 from MusicBot.model.Queue.RedisQueStorage import RedisQueStorage
 from MusicBot.model.Queue.IQue import IQue
+from StringProgressBar import progressBar
+
+from MusicBot.model.Scraper.Yandex.YandexUrl2MusicInfo import YandexUrl2MusicInfo
+
+
+class ServerMusicStorage():
+    def __init__(self) -> None:
+        self.que_storage = RedisQueStorage()
+        self.yandex_parser = YandexUrl2MusicInfo()
+
+    async def search_add_tracks(self, server_id: str, search_query: str, max_number: int = 5) -> List[wavelink.Track]:
+        que = self.que_storage.get_que(server_id)
+        searched_tracks = await self.search_track(search_query, max_number=max_number)
+        for track in searched_tracks:
+            que.push_back(track)
+        return searched_tracks
+
+    async def search_track(self, query: str, max_number: int = 5) -> List[wavelink.Track]:
+        tracks = []
+
+        track_titles = []
+        if 'music.yandex.ru' in query:
+            tracks_info = await self.yandex_parser.parse_asc(query)
+            track_titles = [f'{track_info.title} - {track_info.authors}' for track_info in tracks_info]
+        else:
+            track_titles = [query]
+
+        track_titles = track_titles[:max_number]
+        for track_title in track_titles:
+            try:
+                yt_search_result = await wavelink.YouTubeTrack.search(query=track_title, return_first=True)
+                tracks.append(yt_search_result)
+            except Exception as e:
+                print(e)
+
+        return tracks
+
+    def pop_que(self, server_id: str) -> wavelink.Track:
+        que = self.que_storage.get_que(server_id)
+        return que.pop_front()
+
+    def get_all_que(self, server_id: str) -> List[wavelink.Track]:
+        que = self.que_storage.get_que(server_id)
+        return que.get_all()
+
+    def clear_que(self, server_id: str) -> None:
+        que = self.que_storage.get_que(server_id)
+        que.clear()
 
 
 class MusicCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.que_storage = RedisQueStorage()
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        await wavelink.NodePool.create_node(
-            bot=self.bot,
-            host='0.0.0.0',
-            port=2333,
-            password='secretpaassword')
-
-        print("\n\n\nBot started!")
+        self.storage = ServerMusicStorage()
 
     @commands.command()
-    async def play(self, ctx, *, music_query):
-        server_id = self._get_server_id(ctx)
+    async def play(self, ctx, *track_query):
+        server_id = ctx.message.guild.id
 
-        voice_client = await self.force_connect_to_author_voice(ctx)
-        if not voice_client:
-            await ctx.reply("You are not in voice channel")
-            return
-
-        tracks = [await wavelink.YouTubeTrack.search(query=music_query, return_first=True)]
-        que = self.que_storage.get_que(server_id)
-        for track in tracks:
-            que.push_back(track)
-
-        if not voice_client.is_playing():
-            await voice_client.play(que.pop_front())
-
-        if len(tracks) == 0:
-            await ctx.reply("I cant load your music")
+        max_tracks = 5
+        if len(track_query) > 1 and track_query[-1].isdigit():
+            max_tracks = int(track_query[-1])
+            track_query = ' '.join(track_query[:-1])
         else:
-            await ctx.reply(self.track_que_to_str())
+            track_query = ' '.join(track_query)
+
+        await self.storage.search_add_tracks(server_id, track_query, max_number=max_tracks)
+
+        voice_client = await self.voice_client_join_to_author(ctx)
+        if not voice_client:
+            await ctx.reply("I can't connect the player")
+        elif voice_client.is_paused():
+            await voice_client.play()
+        elif not voice_client.is_playing():
+            next_music = self.storage.pop_que(server_id)
+            await voice_client.play(next_music)
+        
+        await ctx.reply(embed=self.gen_player_status_embed(voice_client))
+        await ctx.send(embed=self.gen_track_list_embed(self.storage.get_all_que(server_id)))
+
+    @commands.Cog.listener()
+    async def on_wavelink_track_end(self, player: wavelink.Player, track:  wavelink.Track, reason):
+        if reason == "FINISHED":
+            server_id = player.guild.id
+            next_track = self.storage.pop_que(server_id)
+            await player.play(next_track)
 
     @commands.command()
     async def pause(self, ctx):
-        await ctx.voice_client.pause()
-
-    @commands.command()
-    async def resume(self, ctx):
-        await ctx.voice_client.resume()
+        voice_client = await self.voice_client_join_to_author(ctx)
+        await voice_client.pause()
 
     @commands.command()
     async def list(self, ctx):
-        server_id = self._get_server_id(ctx)
+        player = ctx.voice_client
+        server_id = ctx.message.guild.id
 
-        que = self.que_storage.get_que(server_id)
-        await ctx.reply(self.track_que_to_str(que))
+        await ctx.reply(embed=self.gen_player_status_embed(player))
+        await ctx.send(embed=self.gen_track_list_embed(self.storage.get_all_que(server_id)))
 
     @commands.command()
     async def clear(self, ctx):
-        server_id = self._get_server_id(ctx)
+        server_id = ctx.message.guild.id
+        voice_client = await self.voice_client_join_to_author(ctx)
 
-        self.que_storage.get_que(server_id).clear()
+        self.storage.clear_que(server_id)
         await ctx.reply("Music list cleared")
 
-        voice_client = self._get_voice_client(ctx)
-        await voice_client.stop()
+        if voice_client:
+            await voice_client.stop()
 
     @commands.command()
     async def skip(self, ctx):
-        server_id = self._get_server_id(ctx)
-        voice_client = self._get_voice_client(ctx)
+        server_id = ctx.message.guild.id
+        voice_client = await self.voice_client_join_to_author(ctx)
+        if voice_client:
+            await voice_client.stop()
 
-        que = self.que_storage.get_que(server_id)
-        track = que.pop_front()
+            next_track = self.storage.pop_que(server_id)
+            await voice_client.play(next_track)
 
-        await ctx.reply(self.track_que_to_str(que))
-        await voice_client.play(track)
+            await ctx.reply(embed=self.gen_player_status_embed(voice_client))
+            await ctx.send(embed=self.gen_track_list_embed(self.storage.get_all_que(server_id)))
 
-    def _get_server_id(self, ctx):
-        return ctx.message.guild.id
+    async def stop_voice(self, ctx):
+        voice_client = ctx.voice_client
+        if voice_client:
+            await voice_client.stop()
 
-    def _get_author_voice(self, ctx):
-        return ctx.message.author.voice
+    async def play_next(self, ctx):
+        voice_client = ctx.voice_client
+        if voice_client:
+            next_track = self.storage.pop_que(ctx.message.guild.id)
+            await voice_client.play(next_track)
 
-    def _get_voice_client(self, ctx):
-        return ctx.voice_client
+    async def voice_client_join_to_author(self, ctx) -> wavelink.Player:
+        voice_client = None
 
-    def _get_author_voice_channel(self, ctx):
-        return ctx.message.author.voice.channel
+        author_voice = ctx.message.author.voice
+        if author_voice:
+            author_voice_channel = author_voice.channel
 
-    def track_list_to_str(self, track_list: List[str]):
-        s = ''
-        for i, music in enumerate(track_list):
-            s += f'{i+1}. {music.author}: {music.title}\n'
-        return s
+            voice_client = ctx.voice_client
+            if voice_client is None:
+                voice_client = await author_voice_channel.connect(cls=wavelink.Player)
 
-    def track_que_to_str(self, music_que: IQue):
-        track_list = music_que.get_all()
-
-        if len(track_list) == 0:
-            return "Music queue is empty"
-        else:
-            return self.track_list_to_str(track_list)
-
-    async def force_connect_to_author_voice(self, ctx):
-        author_voice = self._get_author_voice(ctx)
-        if not author_voice:
-            return None
-
-        voice_client = self._get_voice_client(ctx)
-        voice_channel = self._get_author_voice_channel(ctx)
-        if voice_client is None:
-            voice_client = await voice_channel.connect(cls=wavelink.Player)
-        await voice_client.move_to(voice_channel)
+            await voice_client.move_to(author_voice_channel)
 
         return voice_client
 
-    # def get_track_full_info(self, track):
-        # return ""
+    def gen_player_status_embed(self, player: wavelink.Player) -> discord.Embed:
+        if not player or not (player.is_paused() or player.is_playing()):
+            embed = discord.Embed(title="List is not playing", color=0xdd0000)
+        else:
+            track = player.track
+
+            passed_time = datetime.timedelta(seconds=int(player.position))
+            all_time = datetime.timedelta(seconds=int(track.duration))
+
+            pb = progressBar.splitBar(
+                total=int(all_time.total_seconds()),
+                current=int(passed_time.total_seconds()),
+                size=15)
+            pb_str = pb[0]
+
+            embed = discord.Embed(
+                title=track.title, color=0x00dd00, description=pb_str)
+            embed.set_author(name=track.author)
+            embed.set_footer(text=f'{str(passed_time)} / {str(all_time)}')
+
+        return embed
+
+    def gen_track_list_embed(self, track_list: List[wavelink.Track]) -> discord.Embed:
+        if not track_list:
+            embed = discord.Embed(title="Music list is empty", color=0xdd0000)
+        else:
+            track_list_str = ''
+            for track_id, track in enumerate(track_list, start=1):
+                track_id_formatted = str(track_id)[:2].rjust(2)
+                author_formatted = track.author[:10].ljust(10)
+                title_formatted = track.title[:30].ljust(30)
+                duration = str(datetime.timedelta(seconds=int(track.duration)))
+
+                track_list_str += f'{track_id_formatted}. {author_formatted}: {title_formatted} | {duration}\n'
+                if track_id > 20:
+                    track_list_str += '...'
+                    break
+            track_list_str = f'```{track_list_str}```'
+
+            embed_title = f'Music list ({len(track_list)} tracks)'
+            embed = discord.Embed(
+                title=embed_title, color=0x3299cd, description=track_list_str)
+
+        return embed
 
 
 async def setup(bot):
