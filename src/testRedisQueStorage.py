@@ -1,8 +1,7 @@
 import unittest
-
 from zope.interface.verify import verifyObject
-from MusicBot.model.Queue.IQue import IQue
 
+from MusicBot.model.Queue.IQue import IQue
 from MusicBot.model.Queue.IQueStorage import IQueStorage
 from MusicBot.model.Queue.RedisQueStorage import RedisQueStorage
 

@@ -18,20 +18,22 @@ class MusicCommands(commands.Cog):
 
     @commands.command()
     async def play(self, ctx, *track_query):
+        server_id = ctx.message.guild.id
         max_tracks = 5
+
         if len(track_query) > 1 and track_query[-1].isdigit():
             max_tracks = int(track_query[-1])
-            track_query = ' '.join(track_query[:-1])
-        else:
-            track_query = ' '.join(track_query)
+            track_query = track_query[:-1]
 
-        server_id = ctx.message.guild.id
+        track_query = ' '.join(track_query)
+
         await self.storage.search_add_tracks(server_id, track_query, max_number=max_tracks)
         await self._play_next(ctx)
 
     async def _play_next(self, ctx):
         server_id = ctx.message.guild.id
         voice_client = await self.voice_client_join_to_author(ctx)
+
         if not voice_client:
             await ctx.reply("I can't connect the channel")
         elif voice_client.is_paused():
@@ -77,7 +79,8 @@ class MusicCommands(commands.Cog):
     @commands.command()
     async def skip(self, ctx):
         voice_client = await self.voice_client_join_to_author(ctx)
-        await voice_client.stop()
+        if voice_client:
+            await voice_client.stop()
 
         await asyncio.sleep(2) # it need a break before changing is_playing status?
         await self._play_next(ctx)
