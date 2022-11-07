@@ -4,57 +4,11 @@ import discord
 from discord.ext import commands
 import wavelink
 import datetime
+import asyncio
 
-from MusicBot.model.Queue.RedisQueStorage import RedisQueStorage
-from MusicBot.model.Queue.IQue import IQue
 from StringProgressBar import progressBar
 
-from MusicBot.model.Scraper.Yandex.YandexUrl2MusicInfo import YandexUrl2MusicInfo
-
-
-class ServerMusicStorage():
-    def __init__(self) -> None:
-        self.que_storage = RedisQueStorage()
-        self.yandex_parser = YandexUrl2MusicInfo()
-
-    async def search_add_tracks(self, server_id: str, search_query: str, max_number: int = 5) -> List[wavelink.Track]:
-        que = self.que_storage.get_que(server_id)
-        searched_tracks = await self.search_track(search_query, max_number=max_number)
-        for track in searched_tracks:
-            que.push_back(track)
-        return searched_tracks
-
-    async def search_track(self, query: str, max_number: int = 5) -> List[wavelink.Track]:
-        tracks = []
-
-        track_titles = []
-        if 'music.yandex.ru' in query:
-            tracks_info = await self.yandex_parser.parse_asc(query)
-            track_titles = [f'{track_info.title} - {track_info.authors}' for track_info in tracks_info]
-        else:
-            track_titles = [query]
-
-        track_titles = track_titles[:max_number]
-        for track_title in track_titles:
-            try:
-                yt_search_result = await wavelink.YouTubeTrack.search(query=track_title, return_first=True)
-                tracks.append(yt_search_result)
-            except Exception as e:
-                print(e)
-
-        return tracks
-
-    def pop_que(self, server_id: str) -> wavelink.Track:
-        que = self.que_storage.get_que(server_id)
-        return que.pop_front()
-
-    def get_all_que(self, server_id: str) -> List[wavelink.Track]:
-        que = self.que_storage.get_que(server_id)
-        return que.get_all()
-
-    def clear_que(self, server_id: str) -> None:
-        que = self.que_storage.get_que(server_id)
-        que.clear()
+from MusicBot.model.ServerMusicStorage import ServerMusicStorage
 
 
 class MusicCommands(commands.Cog):
@@ -64,8 +18,6 @@ class MusicCommands(commands.Cog):
 
     @commands.command()
     async def play(self, ctx, *track_query):
-        server_id = ctx.message.guild.id
-
         max_tracks = 5
         if len(track_query) > 1 and track_query[-1].isdigit():
             max_tracks = int(track_query[-1])
@@ -73,11 +25,15 @@ class MusicCommands(commands.Cog):
         else:
             track_query = ' '.join(track_query)
 
+        server_id = ctx.message.guild.id
         await self.storage.search_add_tracks(server_id, track_query, max_number=max_tracks)
+        await self._play_next(ctx)
 
+    async def _play_next(self, ctx):
+        server_id = ctx.message.guild.id
         voice_client = await self.voice_client_join_to_author(ctx)
         if not voice_client:
-            await ctx.reply("I can't connect the player")
+            await ctx.reply("I can't connect the channel")
         elif voice_client.is_paused():
             await voice_client.play()
         elif not voice_client.is_playing():
@@ -120,27 +76,11 @@ class MusicCommands(commands.Cog):
 
     @commands.command()
     async def skip(self, ctx):
-        server_id = ctx.message.guild.id
         voice_client = await self.voice_client_join_to_author(ctx)
-        if voice_client:
-            await voice_client.stop()
+        await voice_client.stop()
 
-            next_track = self.storage.pop_que(server_id)
-            await voice_client.play(next_track)
-
-            await ctx.reply(embed=self.gen_player_status_embed(voice_client))
-            await ctx.send(embed=self.gen_track_list_embed(self.storage.get_all_que(server_id)))
-
-    async def stop_voice(self, ctx):
-        voice_client = ctx.voice_client
-        if voice_client:
-            await voice_client.stop()
-
-    async def play_next(self, ctx):
-        voice_client = ctx.voice_client
-        if voice_client:
-            next_track = self.storage.pop_que(ctx.message.guild.id)
-            await voice_client.play(next_track)
+        await asyncio.sleep(2) # it need a break before changing is_playing status?
+        await self._play_next(ctx)
 
     async def voice_client_join_to_author(self, ctx) -> wavelink.Player:
         voice_client = None
@@ -159,12 +99,14 @@ class MusicCommands(commands.Cog):
 
     def gen_player_status_embed(self, player: wavelink.Player) -> discord.Embed:
         if not player or not (player.is_paused() or player.is_playing()):
-            embed = discord.Embed(title="List is not playing", color=0xdd0000)
+            embed = discord.Embed(title="Music is not playing", color=0xdd0000)
         else:
             track = player.track
 
             passed_time = datetime.timedelta(seconds=int(player.position))
             all_time = datetime.timedelta(seconds=int(track.duration))
+            if passed_time == all_time:
+                passed_time = datetime.timedelta(seconds=0)
 
             pb = progressBar.splitBar(
                 total=int(all_time.total_seconds()),
