@@ -1,10 +1,13 @@
+if __name__ == '__main__':
+    import os
+    os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import unittest
 
 from zope.interface.verify import verifyObject
 
 from MusicBot.model.Queue.RedisQue import RedisQue
 from MusicBot.model.Queue.IQue import IQue
-
 
 class TestRedisQue(unittest.TestCase):
     def setUp(self):
