@@ -25,6 +25,7 @@ async def on_ready():
 
 
 async def run(token: str):
+    bot.remove_command('help') 
     await bot.load_extension("MusicBot.bot.cogs.MusicCommands")
     await bot.start(token)
 

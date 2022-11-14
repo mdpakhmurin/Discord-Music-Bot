@@ -85,6 +85,10 @@ class MusicCommands(commands.Cog):
         await asyncio.sleep(2) # it need a break before changing is_playing status?
         await self._play_next(ctx)
 
+    @commands.command()
+    async def help(self, ctx):
+        await ctx.reply(embed=self.gen_help_info())
+
     async def voice_client_join_to_author(self, ctx) -> wavelink.Player:
         voice_client = None
 
@@ -144,6 +148,18 @@ class MusicCommands(commands.Cog):
             embed_title = f'Music list ({len(track_list)} tracks)'
             embed = discord.Embed(
                 title=embed_title, color=0x3299cd, description=track_list_str)
+
+        return embed
+
+    def gen_help_info(self) -> discord.Embed:
+        help_info = \
+            "➥ **play {title | link} [maximum tracks]** - add music to queue\n" \
+            "➥ **play** - resume player\n" \
+            "➥ **pause** - pause player\n" \
+            "➥ **clear** - clear music queue\n" \
+            "➥ **list** - show music queue\n" \
+            "➥ **skip** - play next music from queue"
+        embed = discord.Embed(title="Help", color=0x00dd00, description=help_info)
 
         return embed
 
