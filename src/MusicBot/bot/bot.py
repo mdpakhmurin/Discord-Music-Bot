@@ -1,7 +1,8 @@
 import asyncio
-from distutils.command.config import config
+
 import discord
 from discord.ext import commands
+from MusicBot.bot import config
 
 import wavelink
 
@@ -9,20 +10,22 @@ intents = discord.Intents().all()
 client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-
-# @commands.Cog.listener()
 @bot.event
 async def on_ready():
-    await wavelink.NodePool.create_node(
-        bot=bot,
-        host='0.0.0.0',
-        port=2333,
-        password='secretpaassword')
+    for node in config.lavalink_nodes:
+        await wavelink.NodePool.create_node(
+            bot=bot,
+            host=node['host'],
+            port=node['port'],
+            password=node['password']
+        )
 
-    print("\n*3")
+    print("\n"*3)
     print("Bot started!")
 
 
 async def run(token: str):
     await bot.load_extension("MusicBot.bot.cogs.MusicCommands")
     await bot.start(token)
+
+asyncio.run(run(config.bot_token))

@@ -1,7 +1,1 @@
-from redis import Redis
-from MusicBot.bot.bot import run
-import config
-
-import asyncio
-
-asyncio.run(run(config.bot_token))
+import MusicBot.bot.bot
