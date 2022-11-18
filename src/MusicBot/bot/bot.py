@@ -29,4 +29,8 @@ async def run(token: str):
     await bot.load_extension("MusicBot.bot.cogs.MusicCommands")
     await bot.start(token)
 
+@bot.event
+async def on_command_error(ctx, err):
+    print(err)
+
 asyncio.run(run(config.bot_token))
