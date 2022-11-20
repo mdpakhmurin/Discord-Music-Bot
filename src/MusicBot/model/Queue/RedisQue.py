@@ -13,7 +13,7 @@ class RedisQue():
         self._bd = redis.Redis(host=host, port=port)
         self._id = id
 
-        if not self._bd.connection:
+        if not self._bd.ping():
             raise ConnectionError(f"Cannot connect to Redis database ({host, port})")
 
     def get_id(self) -> str:
