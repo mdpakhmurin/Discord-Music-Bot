@@ -1,14 +1,19 @@
-import asyncio
+if __name__ == '__main__':
+    import os
+    os.sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import asyncio
+import MusicBot.bot.config as config
 import discord
 from discord.ext import commands
-from MusicBot.bot import config
 
 import wavelink
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
+
+lavalink_nodes = []
 
 @bot.event
 async def on_ready():
@@ -23,14 +28,14 @@ async def on_ready():
     print("\n"*3)
     print("Bot started!")
 
-
-async def run(token: str):
-    bot.remove_command('help') 
-    await bot.load_extension("MusicBot.bot.cogs.MusicCommands")
-    await bot.start(token)
-
 @bot.event
 async def on_command_error(ctx, err):
     print(err)
 
-asyncio.run(run(config.bot_token))
+async def run():
+    bot.remove_command('help') 
+    await bot.load_extension("MusicBot.bot.cogs.MusicCommands")
+
+    await bot.start(config.bot_token)
+
+asyncio.run(run())

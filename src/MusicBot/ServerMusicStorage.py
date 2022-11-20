@@ -4,11 +4,13 @@ import wavelink
 from MusicBot.model.Queue.RedisQueStorage import RedisQueStorage
 from MusicBot.model.Scraper.Yandex.YandexUrl2MusicInfo import YandexUrl2MusicInfo 
 
+from MusicBot.model.Queue.IQueStorage import IQueStorage
+from MusicBot.model.Scraper.IUrl2MusicInfo import IUrl2MusicInfo
 
 class ServerMusicStorage():
-    def __init__(self) -> None:
-        self.que_storage = RedisQueStorage()
-        self.parsers = [YandexUrl2MusicInfo()]
+    def __init__(self, que_storage: IQueStorage, parsers: IUrl2MusicInfo) -> None:
+        self.que_storage = que_storage 
+        self.parsers = parsers
 
     async def search_add_tracks(self, server_id: str, search_query: str, max_number: int = 5) -> List[wavelink.Track]:
         que = self.que_storage.get_que(server_id)

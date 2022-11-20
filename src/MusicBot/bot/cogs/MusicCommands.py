@@ -8,13 +8,16 @@ import asyncio
 
 from StringProgressBar import progressBar
 
-from MusicBot.model.ServerMusicStorage import ServerMusicStorage
+from MusicBot.ServerMusicStorage import ServerMusicStorage
+
+from MusicBot.model.Scraper.Yandex.YandexUrl2MusicInfo import YandexUrl2MusicInfo
+from MusicBot.model.Queue.RedisQueStorage import RedisQueStorage
 
 
 class MusicCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.storage = ServerMusicStorage()
+        self.storage = ServerMusicStorage(que_storage=RedisQueStorage(), parsers=[YandexUrl2MusicInfo()])
 
     @commands.command()
     async def play(self, ctx, *track_query):
@@ -41,7 +44,7 @@ class MusicCommands(commands.Cog):
         elif not voice_client.is_playing():
             next_music = self.storage.pop_que(server_id)
             await voice_client.play(next_music)
-        
+
         await ctx.reply(embed=self.gen_player_status_embed(voice_client))
         await ctx.send(embed=self.gen_track_list_embed(self.storage.get_all_que(server_id)))
 
@@ -82,7 +85,8 @@ class MusicCommands(commands.Cog):
         if voice_client:
             await voice_client.stop()
 
-        await asyncio.sleep(2) # it need a break before changing is_playing status?
+        # it need a break before changing is_playing status?
+        await asyncio.sleep(2)
         await self._play_next(ctx)
 
     @commands.command()
@@ -159,7 +163,8 @@ class MusicCommands(commands.Cog):
             "➥ **clear** - clear music queue\n" \
             "➥ **list** - show music queue\n" \
             "➥ **skip** - play next music from queue"
-        embed = discord.Embed(title="Help", color=0x00dd00, description=help_info)
+        embed = discord.Embed(
+            title="Help", color=0x00dd00, description=help_info)
 
         return embed
 
